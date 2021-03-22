@@ -98,14 +98,16 @@ int main(int argc, char* argv[]) {
 		}
 		in.close();
 		long double det;
-		auto start = std::chrono::system_clock::now();
+		auto start = std::chrono::high_resolution_clock::now();
+
 		det = num_threads == -1 ?
 			determinant_linear(mat, n) : determinant_parallel(mat, n, num_threads);
-		auto end = std::chrono::system_clock::now();
-		double delta = std::chrono::duration_cast<std::chrono::milliseconds>(end - start).count() / 1000.0;
+
+		auto end = std::chrono::high_resolution_clock::now();
+		const auto delta = (end - start) / std::chrono::milliseconds(1);
 
 		printf_s("Determinant: %f\n", det);
-		printf_s("\nTime (%i thread(s)): %f ms\n", num_threads, delta);
+		printf_s("\nTime (%i thread(s)): %i ms\n", num_threads, delta);
 
 		free(mat);
 	}
