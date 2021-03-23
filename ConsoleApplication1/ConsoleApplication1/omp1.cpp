@@ -62,11 +62,11 @@ long double determinant_parallel(float* a, int n, int num_threads)
 
 #pragma omp parallel num_threads(num_threads)
 		{
-#pragma omp for schedule(guided)
+#pragma omp for schedule(static)
 			for (int j = i + 1; j < n; ++j)
 				a[i * n + j] /= a[i * n + i];
 
-#pragma omp for schedule(guided)
+#pragma omp for schedule(static)
 			for (int j = 0; j < n; ++j)
 				if (j != i && abs(a[j * n + i]) > 0.001)
 					for (int k = i + 1; k < n; ++k)
@@ -83,7 +83,7 @@ int main(int argc, char* argv[]) {
 		std::ifstream in(argv[1]);
 		if (!in) {
 			printf_s("File not found\n");
-			return 0;
+			return 1;
 		}
 
 		int num_threads = atoi(argv[2]);
@@ -106,8 +106,8 @@ int main(int argc, char* argv[]) {
 		auto end = std::chrono::high_resolution_clock::now();
 		const auto delta = (end - start) / std::chrono::milliseconds(1);
 
-		printf_s("Determinant: %f\n", det);
-		printf_s("\nTime (%i thread(s)): %i ms\n", num_threads, delta);
+		printf_s("Determinant: %g\n", det);
+		printf_s("\nTime (%i thread(s)): %f ms\n", num_threads, delta);
 
 		free(mat);
 	}
