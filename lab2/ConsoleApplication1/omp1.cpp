@@ -23,25 +23,32 @@ void brightness_linear(short* a, int n, int colors) {
 
 	int p = n / (colors + 1);
 
+	int start = 0, k = 0;
+	while (start < p)
+		start += count[k++];
+	int startClr = k;
+	int end = 0;
+	k = colors - 1;
+	while (end < p)
+		end += count[k--];
+	int endClr = k;
+
 	// init min max
-	for (int i = 0; i < n; i++) {
-		if (count[a[i]] > p) {
-			max = a[i];
-			min = a[i];
-			break;
-		}
-	}
+	max = startClr;
+	min = endClr;
 
 	// find min max
 	for (int i = 0; i < n; i++) {
-		if (count[a[i]] > p) {
+		if (a[i] > startClr && a[i] < endClr) {
 			if (max < a[i])
 				max = a[i];
 			if (min > a[i])
 				min = a[i];
 		}
 	}
+
 	float mn = max - min;
+
 	for (int i = 0; i < n; i++) {
 		a[i] = (a[i] - min) * colors / mn;
 	}
