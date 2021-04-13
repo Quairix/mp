@@ -10,7 +10,7 @@
  *	@param colors количество цветов
  **/
 void brightness_linear(short* a, int n, int colors) {
-	short* count = (short*)malloc(colors * sizeof(short));
+	int* count = (int*)malloc(colors * sizeof(int));
 
 	for (int i = 0; i < colors; i++)
 		count[i] = 0;
@@ -46,18 +46,17 @@ void brightness_linear(short* a, int n, int colors) {
 				min = a[i];
 		}
 	}
-
 	float mn = max - min;
 
 	for (int i = 0; i < n; i++) {
-		a[i] = (a[i] - min) * colors / mn;
+		short t = (a[i] - min) * colors / mn;
+		a[i] = t > 255 ? 255 : (abs)(t);
 	}
 	free(count);
 }
 
-void brightness_parallel(short* a, int n, int colors, int num_threads)
-{
-	short* count = (short*)malloc(colors * sizeof(short));
+void brightness_parallel(short* a, int n, int colors, int num_threads) {
+	int* count = (int*)malloc(colors * sizeof(int));
 
 	for (int i = 0; i < colors; i++)
 		count[i] = 0;
@@ -70,18 +69,23 @@ void brightness_parallel(short* a, int n, int colors, int num_threads)
 
 	int p = n / (colors + 1);
 
+	int start = 0, k = 0;
+	while (start < p)
+		start += count[k++];
+	int startClr = k;
+	int end = 0;
+	k = colors - 1;
+	while (end < p)
+		end += count[k--];
+	int endClr = k;
+
 	// init min max
-	for (int i = 0; i < n; i++) {
-		if (count[a[i]] > p) {
-			max = a[i];
-			min = a[i];
-			break;
-		}
-	}
+	max = startClr;
+	min = endClr;
 
 	// find min max
 	for (int i = 0; i < n; i++) {
-		if (count[a[i]] > p) {
+		if (a[i] > startClr && a[i] < endClr) {
 			if (max < a[i])
 				max = a[i];
 			if (min > a[i])
@@ -94,7 +98,8 @@ void brightness_parallel(short* a, int n, int colors, int num_threads)
 	{
 #pragma omp for schedule(static)
 		for (int i = 0; i < n; i++) {
-			a[i] = (a[i] - min) * colors / mn;
+			short t = (a[i] - min) * colors / mn;
+			a[i] = t > 255 ? 255 : (abs)(t);
 		}
 	}
 	free(count);
@@ -125,7 +130,7 @@ int main(int argc, char* argv[]) {
 		char* mat = (char*)malloc(n * n2 * 3 * sizeof(char));
 		in.read(mat, n * n2 * 3);
 		for (int i = 0; i < n * n2 * 3; i++)
-			mat4[i] = (short)mat[i] + 128;
+			mat4[i] = (unsigned char)mat[i];
 		in.close();
 
 		auto start = std::chrono::high_resolution_clock::now();
@@ -149,10 +154,9 @@ int main(int argc, char* argv[]) {
 		std::string temp = std::to_string(n) + " " + std::to_string(n2) + "\n" + std::to_string(colors);
 		out.write(temp.c_str(), temp.size());
 
-		char* mat2 = (char*)malloc(n * n2 * 3 * sizeof(char));
 
 		for (int i = 0; i < n * n2 * 3; i++) {
-			mat2[i] = (char)(mat[i] - 128);
+			mat[i] = mat4[i];
 		}
 
 		out.write(mat, n * n2 * 3 * sizeof(char));
