@@ -58,11 +58,20 @@ void brightness_linear(short* a, int n, int colors) {
 void brightness_parallel(short* a, int n, int colors, int num_threads) {
 	int* count = (int*)malloc(colors * sizeof(int));
 
-	for (int i = 0; i < colors; i++)
-		count[i] = 0;
+#pragma omp parallel num_threads(num_threads)
+	{
+#pragma omp for schedule(static)
+		for (int i = 0; i < colors; i++)
+			count[i] = 0;
+	}
 
-	for (int i = 0; i < n; i++)
-		count[a[i]]++;
+
+#pragma omp parallel num_threads(num_threads)
+	{
+#pragma omp for schedule(static)
+		for (int i = 0; i < n; i++)
+			count[a[i]]++;
+	}
 
 	int max = 0;
 	int min = colors;
@@ -139,9 +148,10 @@ int main(int argc, char* argv[]) {
 			brightness_linear(mat4, n * n2 * 3, colors) : brightness_parallel(mat4, n, colors, num_threads);
 
 		auto end = std::chrono::high_resolution_clock::now();
-		const auto delta = (end - start) / std::chrono::milliseconds(1);
 
-		printf_s("\nTime (%i thread(s)): %f ms\n", num_threads, delta);
+		const auto delta = (end - start) / std::chrono::microseconds(1);
+
+		printf_s("\nTime (%i thread(s)): %d mcs\n", num_threads, delta);
 
 		std::ofstream out(argv[2], std::ios::binary);
 		if (!out) {
