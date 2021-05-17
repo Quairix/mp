@@ -5,14 +5,13 @@
 #define CL_INCLUDE_FILE "Settings.h"
 
 #define CL_PTX_FILE "bin/myGEMM.cl.ptx"
-// Threadblock sizes (e.g. for kernels myGEMM1 or myGEMM2)
-#define TS 32
 
 #include <CL/cl.h>
 #include <iostream>
 #include <fstream>
 #include <vector>
 #include <chrono>
+#include  "Settings.h"
 
 // Forward declaration of the OpenCL error checking function
 void checkError(cl_int error, int line);
@@ -128,7 +127,6 @@ int main(int argc, char* argv[]) {
 	}
 
 	// Configure the OpenCL environment
-	printf(">>> Initializing OpenCL...\n");
 	cl_platform_id platform = 0;
 	clGetPlatformIDs(1, &platform, NULL);
 	cl_device_id device = all_devices[device_number];
@@ -156,17 +154,6 @@ int main(int argc, char* argv[]) {
 	checkError(err, __LINE__);
 	clBuildProgram(program, 0, NULL, COMPILER_OPTIONS, NULL, NULL);
 
-	// Retrieve the PTX code from the OpenCL compiler and output it to disk
-	size_t binSize;
-	err = clGetProgramInfo(program, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &binSize, NULL);
-	checkError(err, __LINE__);
-	unsigned char* bin = (unsigned char*)malloc(binSize);
-	err = clGetProgramInfo(program, CL_PROGRAM_BINARIES, sizeof(unsigned char*), &bin, NULL);
-	checkError(err, __LINE__);
-	FILE* file = fopen(CL_PTX_FILE, "wb");
-	fwrite(bin, sizeof(char), binSize, file);
-	fclose(file);
-	free(bin);
 
 	// Check for compilation errors
 	size_t logSize;
@@ -212,7 +199,19 @@ int main(int argc, char* argv[]) {
 	auto start = std::chrono::high_resolution_clock::now();
 
 	// Run the my kernel
-	const size_t local[2] = { TS, TS };
+	int block_size_m = TS;
+	while (block_size_m > 1) {
+		if (m % block_size_m == 0)
+			break;
+		block_size_m--;
+	}
+	int block_size_n = TS;
+	while (block_size_n > 1) {
+		if (m % block_size_n == 0)
+			break;
+		block_size_n--;
+	}
+	const size_t local[2] = { block_size_m, block_size_n };
 	const size_t global[2] = { m, n };
 	clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, local, 0, NULL, &event);
 
@@ -246,7 +245,6 @@ int main(int argc, char* argv[]) {
 	output << n << " " << m << std::endl;
 	for (size_t i = 0; i < m; ++i) {
 		for (size_t j = 0; j < n; ++j) {
-			printf("\n%f\n", C[i * n + j]);
 			output << C[i * n + j] << " ";
 		}
 		output << std::endl;
