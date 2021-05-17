@@ -12,9 +12,6 @@
 //
 // =================================================================================================
 
-// Select a kernel
-#define KERNEL 8
-
 // Constants for kernels 1 -- 5
 #define TS 32                        // The square-root of the 2D tile-size (== work-group dims)
 

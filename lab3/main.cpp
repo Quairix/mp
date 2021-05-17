@@ -1,11 +1,10 @@
-#define CL_HPP_ENABLE_EXCEPTIONS
-#define CL_HPP_MINIMUM_OPENCL_VERSION 120
-#define CL_HPP_TARGET_OPENCL_VERSION 120
+
 #define CL_KERNEL_FILE "kernel.cl"
 // Define OpenCL compiler options, such as "-cl-nv-maxrregcount=127"
 #define COMPILER_OPTIONS ""
 #define CL_INCLUDE_FILE "Settings.h"
 
+#define CL_PTX_FILE "bin/myGEMM.cl.ptx"
 // Threadblock sizes (e.g. for kernels myGEMM1 or myGEMM2)
 #define TS 32
 
@@ -155,7 +154,19 @@ int main(int argc, char* argv[]) {
 	// Compile the kernel
 	cl_program program = clCreateProgramWithSource(context, 1, &constCode, NULL, &err);
 	checkError(err, __LINE__);
-	clBuildProgram(program, 0, NULL, "", NULL, NULL);
+	clBuildProgram(program, 0, NULL, COMPILER_OPTIONS, NULL, NULL);
+
+	// Retrieve the PTX code from the OpenCL compiler and output it to disk
+	size_t binSize;
+	err = clGetProgramInfo(program, CL_PROGRAM_BINARY_SIZES, sizeof(size_t), &binSize, NULL);
+	checkError(err, __LINE__);
+	unsigned char* bin = (unsigned char*)malloc(binSize);
+	err = clGetProgramInfo(program, CL_PROGRAM_BINARIES, sizeof(unsigned char*), &bin, NULL);
+	checkError(err, __LINE__);
+	FILE* file = fopen(CL_PTX_FILE, "wb");
+	fwrite(bin, sizeof(char), binSize, file);
+	fclose(file);
+	free(bin);
 
 	// Check for compilation errors
 	size_t logSize;
@@ -213,12 +224,14 @@ int main(int argc, char* argv[]) {
 	const auto delta = (end - start) / std::chrono::microseconds(1);
 
 	// Copy the output matrix C back to the CPU memory
-	clEnqueueReadBuffer(queue, bufC, CL_TRUE, 0, m * n * sizeof(float), C, 0, NULL, NULL);
+	clEnqueueReadBuffer(queue, bufC, CL_TRUE, 0, m * n * sizeof(*C), C, 0, NULL, NULL);
 
 	auto full_end = std::chrono::high_resolution_clock::now();
 	const auto full_delta = (full_end - full_start) / std::chrono::microseconds(1);
-	printf("\nTime: %f\t%f \n", delta, full_delta);
+	printf("\nTime: %d\t%d \n", delta, full_delta);
 
+	// Free the memory objects
+	free(code);
 	// Free the OpenCL memory objects
 	clReleaseMemObject(bufA);
 	clReleaseMemObject(bufB);
@@ -232,8 +245,10 @@ int main(int argc, char* argv[]) {
 
 	output << n << " " << m << std::endl;
 	for (size_t i = 0; i < m; ++i) {
-		for (size_t j = 0; j < n; ++j)
+		for (size_t j = 0; j < n; ++j) {
+			printf("\n%f\n", C[i * n + j]);
 			output << C[i * n + j] << " ";
+		}
 		output << std::endl;
 	}
 
