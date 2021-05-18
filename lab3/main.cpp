@@ -85,6 +85,47 @@ char* readKernelFile(const char* filename, long* _size) {
 	return source;
 }
 
+int gcd(int a, int b) {
+	int nod = 1L;
+	int tmp;
+	if (a == 0L)
+		return b;
+	if (b == 0L)
+		return a;
+	if (a == b)
+		return a;
+	if (a == 1L || b == 1L)
+		return 1L;
+	while (a != 0 && b != 0) {
+		if (((a & 1L) | (b & 1L)) == 0L) {
+			nod <<= 1L;
+			a >>= 1L;
+			b >>= 1L;
+			continue;
+		}
+		if (((a & 1L) == 0L) && (b & 1L)) {
+			a >>= 1L;
+			continue;
+		}
+		if ((a & 1L) && ((b & 1L) == 0L)) {
+			b >>= 1L;
+			continue;
+		}
+		if (a > b) {
+			tmp = a;
+			a = b;
+			b = tmp;
+		}
+		tmp = a;
+		a = (b - a) >> 1L;
+		b = tmp;
+	}
+	if (a == 0)
+		return nod * b;
+	else
+		return nod * a;
+}
+
 int main(int argc, char* argv[]) {
 	if (argc != 5) {
 		std::cerr << "Wrong count of arguments" << std::endl;
@@ -140,15 +181,13 @@ int main(int argc, char* argv[]) {
 	long sizeSource, sizeHeader; 
 	cl_int err;
 
-	int block_size_m = getMinDel(m, TS);
-	int block_size_n = getMinDel(n, TS);
-	int TSX = getMinDel(k, n);
-	int TSY = getMinDel(m, k);
-	int ts = getMinDel(TSX, TSY);
-	int wpt = getMinDel(block_size_m, 8);
+	int TSX = gcd(k, n);
+	int TSY = gcd(m, k);
+	int TS = gcd(TSX, TSY);
+	int WPT = gcd(TS, 8);
 
 	std::string headerText =
-		"#define TS " + std::to_string(ts) + "\n" + "#define WPT " + std::to_string(wpt) + "\n" + "#define RTS (TS/WPT)";
+		"#define TS " + std::to_string(TS) + "\n" + "#define WPT " + std::to_string(WPT) + "\n" + "#define RTS (TS/WPT)";
 	char* header = readKernelFile(CL_INCLUDE_FILE, &sizeHeader);
 	char* source = readKernelFile(CL_KERNEL_FILE, &sizeSource);
 	long size = 2 + sizeHeader + sizeSource + headerText.length();
@@ -204,11 +243,12 @@ int main(int argc, char* argv[]) {
 	clSetKernelArg(kernel, 3, sizeof(cl_mem), (void*)&bufA);
 	clSetKernelArg(kernel, 4, sizeof(cl_mem), (void*)&bufB);
 	clSetKernelArg(kernel, 5, sizeof(cl_mem), (void*)&bufC);
+	checkError(err, __LINE__);
 
 	auto start = std::chrono::high_resolution_clock::now();
 
 	// Run the my kernel
-	const size_t local[2] = { block_size_m, block_size_n };
+	const size_t local[2] = { TS, TS };
 	const size_t global[2] = { m, n };
 	clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, local, 0, NULL, &event);
 
