@@ -15,6 +15,7 @@
 
 // Forward declaration of the OpenCL error checking function
 void checkError(cl_int error, int line);
+int getMinDel(int m, int ts);
 
 std::vector<cl_device_id> all_devices;
 
@@ -136,14 +137,24 @@ int main(int argc, char* argv[]) {
 	clGetDeviceInfo(device, CL_DEVICE_NAME, 1024, deviceName, NULL);
 	cl_event event = NULL;
 
-	long sizeSource, sizeHeader;
+	long sizeSource, sizeHeader; 
 	cl_int err;
 
+	int block_size_m = getMinDel(m, TS);
+	int block_size_n = getMinDel(n, TS);
+	int TSX = getMinDel(k, n);
+	int TSY = getMinDel(m, k);
+	int ts = getMinDel(TSX, TSY);
+	int wpt = getMinDel(block_size_m, 8);
+
+	std::string headerText =
+		"#define TS " + std::to_string(ts) + "\n" + "#define WPT " + std::to_string(wpt) + "\n" + "#define RTS (TS/WPT)";
 	char* header = readKernelFile(CL_INCLUDE_FILE, &sizeHeader);
 	char* source = readKernelFile(CL_KERNEL_FILE, &sizeSource);
-	long size = 2 + sizeHeader + sizeSource;
+	long size = 2 + sizeHeader + sizeSource + headerText.length();
 	char* code = (char*)malloc(size * sizeof(char));
 	for (int c = 0; c < size; c++) { code[c] = '\0'; }
+	strcat(code, headerText.c_str());
 	strcat(code, header);
 	strcat(code, source);
 	const char* constCode = code;
@@ -183,8 +194,6 @@ int main(int argc, char* argv[]) {
 	auto full_start = std::chrono::high_resolution_clock::now();
 
 	// Configure the myGEMM kernel
-	//char kernelname[100];
-	//sprintf(kernelname, "myGEMM%d", algorithm+1);
 	std::string kernelname = "myGEMM" + std::to_string(algorithm + 1);
 	cl_kernel kernel = clCreateKernel(program, kernelname.c_str(), &err);
 	checkError(err, __LINE__);
@@ -199,18 +208,6 @@ int main(int argc, char* argv[]) {
 	auto start = std::chrono::high_resolution_clock::now();
 
 	// Run the my kernel
-	int block_size_m = TS;
-	while (block_size_m > 1) {
-		if (m % block_size_m == 0)
-			break;
-		block_size_m--;
-	}
-	int block_size_n = TS;
-	while (block_size_n > 1) {
-		if (m % block_size_n == 0)
-			break;
-		block_size_n--;
-	}
 	const size_t local[2] = { block_size_m, block_size_n };
 	const size_t global[2] = { m, n };
 	clEnqueueNDRangeKernel(queue, kernel, 2, NULL, global, local, 0, NULL, &event);
@@ -254,7 +251,19 @@ int main(int argc, char* argv[]) {
 	free(A);
 	free(B);
 	free(C);
+	output.close();
 	return 0;
+}
+
+int getMinDel(int m, int ts) {
+	if (ts <= 1 || m <= 1) return 1;
+	int block_size = ts;
+	while (block_size > 1) {
+		if (m % block_size == 0)
+			break;
+		block_size--;
+	}
+	return block_size;
 }
 
 // Print an error message to screen (only if it occurs)

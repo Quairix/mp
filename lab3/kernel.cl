@@ -16,7 +16,7 @@ __kernel void myGEMM1(const int M, const int N, const int K,
     }
 
     // Store the result
-    C[globalCol*M + globalRow] = acc;
+    C[globalCol + globalRow*N] = acc;
 }
 
 // Tiled and coalesced version
@@ -61,7 +61,7 @@ __kernel void myGEMM2(const int M, const int N, const int K,
     }
 
     // Store the final result in C
-    C[globalCol*M + globalRow] = acc;
+    C[globalCol + globalRow*N] = acc;
 }
 
 // Increased the amount of work-per-thread by a factor WPT
@@ -114,6 +114,6 @@ __kernel void myGEMM3(const int M, const int N, const int K,
 
     // Store the final results in C
     for (int w=0; w<WPT; w++) {
-        C[(globalCol + w*RTS)*M + globalRow] = acc[w];
+        C[(globalCol + w*RTS) + globalRow*N] = acc[w];
     }
 }

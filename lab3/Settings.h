@@ -26,32 +26,6 @@
 #define TSDK 16                      // The tile-size in dimension K (for kernel 5 only)
 #define LPT ((TSDK*WPT)/(TS))        // The amount of loads-per-thread (assume TSN==TSM)
 
-// Constants for kernels 6 -- 10
-#define TSM 128                      // The tile-size in dimension M
-#define TSN 128                      // The tile-size in dimension N
-#define TSK 16                       // The tile-size in dimension K
-#define WPTM 8                       // The amount of work-per-thread in dimension M
-#define WPTN 8                       // The amount of work-per-thread in dimension N
-#define RTSM (TSM/WPTM)              // The reduced tile-size in dimension M (== number of threads)
-#define RTSN (TSN/WPTN)              // The reduced tile-size in dimension N (== number of threads)
-#define LPTA ((TSK*WPTM*WPTN)/(TSN)) // The amount of loads-per-thread for A
-#define LPTB ((TSK*WPTM*WPTN)/(TSM)) // The amount of loads-per-thread for B
-
-// Constraints on settings for kernels 6 -- 10
-// Note: TSM/WPTM has to be integer
-// Note: TSN/WPTN has to be integer
-// Note: TSM/WIDTH has to be integer
-// Note: TSN/WIDTH has to be integer
-// Note: (TSK*WPTM*WPTN)/(TSN*WIDTH) has to be integer
-// Note: (TSK*WPTM*WPTN)/(TSM*WIDTH) has to be integer
-
-// Constants for kernel 11 (mimicing clBlas)
-#define THREADSX 8
-#define THREADSY 8
-#define RX 8
-#define RY 4
-#define RK (RY)
-
 // Constants for the supporting transpose kernel
 #define TRANSPOSEX 16
 #define TRANSPOSEY 16
