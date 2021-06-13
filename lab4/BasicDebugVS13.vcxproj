@@ -21,7 +21,7 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{917EF7C1-1FD1-4914-B407-C5C8F814ABC2}</ProjectGuid>
     <RootNamespace>BasicDebug</RootNamespace>
-    <ProjectName>ocl1</ProjectName>
+    <ProjectName>ocl2</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
@@ -71,30 +71,30 @@
     <OutDir>$(SolutionDir)bin\x86\$(Configuration)\</OutDir>
     <IntDir>temp\x86\$(Configuration)\</IntDir>
     <IncludePath>$(AMD_APP_SDK)/include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\quari\Desktop\study\mp\lab3\lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\quari\Desktop\study\mp\lab4\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\x86\$(Configuration)\</OutDir>
     <IntDir>temp\x86\$(Configuration)\</IntDir>
     <IncludePath>$(AMDAPPSDKROOT)/include;$(IncludePath)</IncludePath>
-    <LibraryPath>C:\Users\quari\Desktop\study\mp\lab3\lib\x86;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\quari\Desktop\study\mp\lab4\lib\x86;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\x86_64\$(Configuration)\</OutDir>
     <IntDir>temp\x86_64\$(Configuration)\</IntDir>
-    <LibraryPath>C:\Users\quari\Desktop\study\mp\lab3\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\quari\Desktop\study\mp\lab4\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\x86_64\$(Configuration)\</OutDir>
     <IntDir>temp\x86_64\$(Configuration)\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>C:\Users\quari\Desktop\study\mp\lab3\lib\x64;$(LibraryPath)</LibraryPath>
+    <LibraryPath>C:\Users\quari\Desktop\study\mp\lab4\lib\x64;$(LibraryPath)</LibraryPath>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Users\quari\Desktop\study\mp\lab3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\quari\Desktop\study\mp\lab4\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
@@ -124,7 +124,7 @@ copy kernel.cl "$(OutDir)kernel.cl" /Y
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <Optimization>Disabled</Optimization>
-      <AdditionalIncludeDirectories>C:\Users\quari\Desktop\study\mp\lab3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\quari\Desktop\study\mp\lab4\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <PreprocessorDefinitions>WIN32;_WINDOWS;_DEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Debug";%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -154,7 +154,7 @@ copy kernel.cl "$(OutDir)kernel.cl" /Y
       <FunctionLevelLinking>
       </FunctionLevelLinking>
       <IntrinsicFunctions>false</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>C:\Users\quari\Desktop\study\mp\lab3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\quari\Desktop\study\mp\lab4\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <DebugInformationFormat />
       <InlineFunctionExpansion>AnySuitable</InlineFunctionExpansion>
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -193,7 +193,7 @@ copy kernel.cl "$(OutDir)kernel.cl" /Y
       <FunctionLevelLinking>
       </FunctionLevelLinking>
       <IntrinsicFunctions>false</IntrinsicFunctions>
-      <AdditionalIncludeDirectories>C:\Users\quari\Desktop\study\mp\lab3\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>C:\Users\quari\Desktop\study\mp\lab4\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <DebugInformationFormat />
       <PreprocessorDefinitions>WIN32;_WINDOWS;NDEBUG;_CRT_SECURE_NO_WARNINGS;CMAKE_INTDIR="Release";%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -228,9 +228,6 @@ copy kernel.cl "$(OutDir)kernel.cl" /Y
   </ItemGroup>
   <ItemGroup>
     <None Include="kernel.cl" />
-  </ItemGroup>
-  <ItemGroup>
-    <ClInclude Include="Settings.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
