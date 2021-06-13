@@ -10,7 +10,6 @@
 #define OFFSET 256
 
 typedef unsigned int uint;
-typedef struct Platform Platform;
 
 std::vector<cl_device_id> all_devices;
 
