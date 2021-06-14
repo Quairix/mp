@@ -104,6 +104,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <ProgramDataBaseFileName>$(SolutionDir)bin/x86/Debug/BasicDebug.pdb</ProgramDataBaseFileName>
       <AssemblerListingLocation>Debug</AssemblerListingLocation>
+      <AdditionalOptions>-cl-std=CL1.2 %(AdditionalOptions)</AdditionalOptions>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -119,6 +120,10 @@
 copy kernel.cl "$(OutDir)kernel.cl" /Y
 	  </Command>
     </PostBuildEvent>
+    <PreBuildEvent>
+      <Command>
+      </Command>
+    </PreBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>

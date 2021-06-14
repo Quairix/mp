@@ -6,6 +6,11 @@
 #include <chrono>
 #include <iomanip>
 #include <vector>
+#define CL_TARGET_OPENCL_VERSION 120
+#define CL_HPP_MINIMUM_OPENCL_VERSION 120
+#define CL_HPP_TARGET_OPENCL_VERSION 120
+#define CL_HPP_CL_1_2_DEFAULT_BUILD
+#define CL_HPP_ENABLE_EXCEPTIONS
 
 #define OFFSET 256
 
@@ -62,7 +67,7 @@ void error(const char* msg)
 cl_program getProgram(const char* path, const cl_context context)
 {
 	cl_int err;
-	FILE* sourceFile = fopen(path, "r");
+	FILE* sourceFile = fopen(path, "rb");
 
 	fseek(sourceFile, 0, SEEK_END);
 	size_t sourceFileSize = ftell(sourceFile);
@@ -87,7 +92,14 @@ cl_program getProgram(const char* path, const cl_context context)
 void buildProgram(const cl_program program, const cl_device_id deviceID)
 {
 	cl_int err = clBuildProgram(program, 1, &deviceID, "", NULL, NULL);
+	size_t logSize;
 
+	clGetProgramBuildInfo(program, deviceID, CL_PROGRAM_BUILD_LOG, 0, NULL, &logSize);
+
+	char* log = (char*)malloc(logSize * sizeof(char));
+
+	clGetProgramBuildInfo(program, deviceID, CL_PROGRAM_BUILD_LOG, logSize, log, NULL);
+	printf("log: %s\n", log);
 	if (err != 0)
 		error("Error: init OpenCL");
 }
