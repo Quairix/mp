@@ -92,14 +92,16 @@ cl_program getProgram(const char* path, const cl_context context)
 void buildProgram(const cl_program program, const cl_device_id deviceID)
 {
 	cl_int err = clBuildProgram(program, 1, &deviceID, "", NULL, NULL);
-	size_t logSize;
+	if (err != 0) {
+		size_t logSize;
 
-	clGetProgramBuildInfo(program, deviceID, CL_PROGRAM_BUILD_LOG, 0, NULL, &logSize);
+		clGetProgramBuildInfo(program, deviceID, CL_PROGRAM_BUILD_LOG, 0, NULL, &logSize);
 
-	char* log = (char*)malloc(logSize * sizeof(char));
+		char* log = (char*)malloc(logSize * sizeof(char));
 
-	clGetProgramBuildInfo(program, deviceID, CL_PROGRAM_BUILD_LOG, logSize, log, NULL);
-	printf("log: %s\n", log);
+		clGetProgramBuildInfo(program, deviceID, CL_PROGRAM_BUILD_LOG, logSize, log, NULL);
+		printf("Build error: %s\n", log);
+	}
 	if (err != 0)
 		error("Error: init OpenCL");
 }
